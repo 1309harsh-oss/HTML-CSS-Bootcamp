@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style> 
+        :root{
+  --bg: #0a0a0a;
+  --card: #0f0f10;
+  --muted: #bdb8b0;
+  --gold: #d4af37;
+  --accent: rgba(212,175,55,0.08);
+  --glass: rgba(255,255,255,0.02);
+  --focus: 3px;
+  --max-width: 1100px;
+  --radius: 12px;
+  --fade-duration: 450ms;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-serif: 'Playfair Display', serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--font-sans);
+  background:linear-gradient(180deg, var(--bg) 0%, #070707 100%);
+  color:#e9e6e0;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+
+#menu-toggle{position:fixed;left:-9999px;top:auto}
+.sidebar{
+  position:fixed;
+  left:0; top:0; bottom:0;
+  width:280px;
+  max-width:80%;
+  background:linear-gradient(180deg,var(--card), #111);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  padding:28px 20px;
+  transform:translateX(-110%);
+  transition:transform 360ms cubic-bezier(.2,.9,.25,1);
+  z-index:60;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+
+#menu-toggle:checked + .sidebar,
+#menu-toggle:checked ~ .sidebar{ transform: translateX(0); }
+
+
+.overlay{
+  display:block;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 300ms;
+  z-index:50;
+}
+#menu-toggle:checked ~ .overlay{ opacity:1; pointer-events:auto; }
+
+.sidebar .brand h2{
+  font-family:var(--font-serif);
+  margin:0;
+  font-size:22px;
+  color:var(--gold);
+}
+.sidebar .brand p{ color:var(--muted); margin-top:6px; font-size:13px; }
+
+.sidebar-nav{
+  display:flex; flex-direction:column; gap:8px; margin-top:6px;
+}
+.sidebar-nav a{
+  color:#e6e0d8; text-decoration:none; padding:10px 12px; border-radius:8px;
+  transition:background 220ms, transform 220ms;
+  font-weight:600;
+}
+.sidebar-nav a:hover,
+.sidebar-nav a.active{ background: rgba(212,175,55,0.08); color:var(--gold); transform:translateX(4px); }
+
+.sidebar .close-btn{
+  position:absolute; right:12px; top:12px; font-size:20px; cursor:pointer; color:var(--muted);
+}
+
+.sidebar-footer{ margin-top:auto; font-size:13px; color:var(--muted) }
+
+.topbar{
+  position:sticky; top:0; z-index:40;
+  backdrop-filter: blur(6px);
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.top-inner{
+  max-width:var(--max-width);
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:14px 18px;
+}
+.hamburger{ cursor:pointer; font-size:22px; padding:6px 8px; border-radius:8px; background:transparent; color:var(--gold); display:inline-block; }
+.title h1{ margin:0; font-family:var(--font-serif); letter-spacing:0.6px; color:var(--gold); font-size:20px; }
+.title .tag{ margin:0; font-size:12px; color:var(--muted); }
+
+.btn{
+  background:transparent;
+  color:var(--gold);
+  border:1px solid rgba(212,175,55,0.18);
+  padding:8px 12px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:600;
+  transition:transform 180ms, box-shadow 180ms;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:0 6px 20px rgba(212,175,55,0.08) }
+
+.hero{ position:relative; margin:20px auto 0; max-width:var(--max-width); border-radius:var(--radius); overflow:hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);}
+.hero img{ width:100%; height:300px; object-fit:cover; display:block; filter:grayscale(0.02) contrast(1.02); transform:scale(1); transition:transform 500ms; }
+.hero:hover img{ transform:scale(1.03); }
+
+.hero-overlay{
+  position:absolute; inset:0; display:flex; align-items:flex-end; padding:28px; background:linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(10,10,10,0.6) 100%);
+}
+.hero-text h2{ margin:0; font-family:var(--font-serif); font-size:28px; color:var(--gold); text-shadow: 0 6px 28px rgba(212,175,55,0.04); }
+.hero-text p{ margin:6px 0 0; color:var(--muted); font-size:14px }
+
+main{ max-width:var(--max-width); margin:28px auto; padding:0 18px 60px; }
+
+.menu-day{
+  background: linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.02));
+  border:1px solid rgba(212,175,55,0.12);
+  padding:14px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  margin-bottom:20px;
+}
+.menu-day h3{ margin:0; color:var(--gold); font-family:var(--font-serif); font-size:18px; }
+.menu-day-dish{ margin:0; color:var(--muted); font-weight:600 }
+
+.special h2{ color:var(--gold); font-family:var(--font-serif); margin:18px 0 12px; }
+.special-card{
+  display:flex; gap:18px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.0));
+  padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+  align-items:center;
+}
+.special-card figure{ margin:0; width:220px; min-width:140px; overflow:hidden; border-radius:10px; }
+.special-card img{ width:100%; height:140px; object-fit:cover; display:block; transition:transform var(--fade-duration); }
+.special-card:hover img{ transform:scale(1.05); }
+.special-content h3{ margin:0; color:var(--gold); font-family:var(--font-serif); }
+.special-content .desc{ margin:8px 0; color:var(--muted); font-size:14px; }
+.special-content .price{ margin-top:6px; font-weight:700; color:var(--gold); font-size:18px }
+
+
+.menu-section h2{ font-family:var(--font-serif); color:var(--gold); margin:28px 0 12px; text-align:center; }
+
+.menu-category{
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  padding:16px; margin:18px 0; border-radius:12px; border-left:4px solid rgba(212,175,55,0.14);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+.menu-category h3{ display:flex; align-items:center; gap:10px; font-size:18px; margin:0 0 12px; color:var(--gold); font-family:var(--font-serif); }
+.menu-category .icon{ width:20px; height:20px; fill:none; stroke:var(--gold); opacity:0.95 }
+
+
+.items{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding-bottom:6px;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+}
+.items::-webkit-scrollbar{ height:9px }
+.items::-webkit-scrollbar-thumb{ background: rgba(212,175,55,0.25); border-radius:10px }
+.items::-webkit-scrollbar-track{ background: transparent }
+
+
+.item{
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  min-width:260px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.02);
+  display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+  scroll-snap-align:start;
+  transform:translateY(8px);
+  opacity:0;
+  animation:cardIn .52s ease forwards;
+}
+.item:nth-child(1){ animation-delay: 80ms }
+.item:nth-child(2){ animation-delay: 140ms }
+.item:nth-child(3){ animation-delay: 200ms }
+.item:nth-child(4){ animation-delay: 260ms }
+
+@keyframes cardIn {
+  to{ transform:none; opacity:1 }
+}
+
+
+.item-main{ flex:1; min-width:0 }
+.dish{ margin:0; font-size:16px; color: #f7efe0; font-weight:700 }
+.item-desc{ margin:8px 0 0; color:var(--muted); font-size:13px }
+.item-price{ font-weight:700; color:var(--gold); margin-left:12px; white-space:nowrap; align-self:flex-start }
+
+
+.item:hover{
+  transform:translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6), 0 2px 10px rgba(212,175,55,0.04);
+  border-color: rgba(212,175,55,0.16);
+  transition: transform 260ms, box-shadow 260ms, border-color 260ms;
+}
+
+
+.contact{
+  margin-top:24px;
+  padding:20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.02);
+}
+.contact h2{ margin:0 0 14px; color:var(--gold); font-family:var(--font-serif) }
+.contact-grid{ display:flex; gap:18px; flex-wrap:wrap }
+.contact-grid h4{ margin:0 0 6px; color:var(--muted); font-size:13px }
+.contact-grid p{ margin:0; color:#e6e3dd }
+
+
+.site-footer{
+  padding:28px; text-align:center; color:var(--muted); border-top: 1px solid rgba(255,255,255,0.02); margin-top:28px;
+}
+
+@media (max-width:920px){
+  .top-inner{ padding:12px 14px }
+  .special-card{ flex-direction:column; align-items:flex-start }
+  .special-card figure{ width:100%; }
+  .hero img{ height:240px }
+}
+
+@media (max-width:720px){
+  .menu-day{ flex-direction:column; align-items:flex-start; gap:10px }
+  .items{ gap:12px }
+  .item{ min-width:220px }
+  .title h1{ font-size:18px }
+  .hero img{ height:200px }
+}
+
+
+@media (max-width:560px){
+  .sidebar{ width:88%; }
+  .top-actions { display:none }
+}
+
+@media (min-width:1100px){
+  .top-inner, main{ max-width:var(--max-width); margin-left:auto; margin-right:auto }
+}
+
+a:focus, button:focus, input:focus{ outline: none; box-shadow: 0 0 0 var(--focus) rgba(212,175,55,0.12); border-radius:8px; }
+    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Café Delight — Premium</title>
+
+ 
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  
+  <input id="menu-toggle" type="checkbox" aria-label="Open sidebar menu" />
+
+
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <label for="menu-toggle" class="close-btn" aria-hidden="true">✕</label>
+    <div class="brand">
+      <h2>Café Delight</h2>
+      <p>Fresh Taste — Premium</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="active">Home</a>
+      <a href="#menu">Menu</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p>© 2025 Café Delight</p>
+    </div>
+  </aside>
+
+
+  <label for="menu-toggle" class="overlay" aria-hidden="true"></label>
+
+  
+  <header class="topbar">
+    <div class="top-inner">
+      <label for="menu-toggle" class="hamburger" aria-hidden="true">
+        ☰
+      </label>
+
+      <div class="title">
+        <h1>Café Delight</h1>
+        <p class="tag">Fresh Taste Every Day</p>
+      </div>
+
+      <div class="top-actions">
+        <a href="#" class="btn">Reserve</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" aria-hidden="false">
+    <img src="https://images.unsplash.com/photo-1541542684-6f1e6d2dd8ef?q=80&w=1600&auto=format&fit=crop" alt="Restaurant interior with warm lights" />
+    <div class="hero-overlay">
+      <div class="hero-text">
+        <h2>Experience Luxury Dining</h2>
+        <p>Seasonal ingredients · Handcrafted flavors · Curated wines</p>
+      </div>
+    </div>
+  </section>
+
+  <main>
+
+    <section class="menu-day" id="menu-day" aria-labelledby="menu-day-title">
+      <div class="menu-day-inner">
+        <h3 id="menu-day-title">Menu of the Day</h3>
+        <p class="menu-day-dish">Truffle Mushroom Risotto — <strong>₹349</strong></p>
+      </div>
+    </section>
+
+    <section class="special" aria-labelledby="special-title">
+      <h2 id="special-title">⭐ Chef's Special</h2>
+      <article class="special-card">
+        <figure>
+          <img src="https://images.unsplash.com/photo-1604908177522-8b6f0d7f55a4?q=80&w=800&auto=format&fit=crop" alt="Herb-Grilled Chicken plated" />
+        </figure>
+        <div class="special-content">
+          <h3>Signature Herb-Grilled Chicken</h3>
+          <p class="desc">Marinated overnight with aromatic herbs, char-grilled and served with black garlic butter and microgreens.</p>
+          <div class="price">₹499</div>
+        </div>
+      </article>
+    </section>
+
+    
+    <section class="menu-section" id="menu" aria-labelledby="menu-title">
+      <h2 id="menu-title">Our Menu</h2>
+
+    
+      <section class="menu-category" aria-labelledby="starters-title">
+        <h3 id="starters-title">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Starters
+        </h3>
+
+        <div class="items" role="list">
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Veg Spring Rolls</h4>
+              <p class="item-desc">Crispy rolls with spiced garden vegetables and tamarind dip.</p>
+            </div>
+            <div class="item-price">₹120</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Tomato Bisque</h4>
+              <p class="item-desc">Silky roasted tomato bisque with basil oil.</p>
+            </div>
+            <div class="item-price">₹150</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Garlic & Herb Focaccia</h4>
+              <p class="item-desc">Warm, olive-oil brushed focaccia with roasted garlic.</p>
+            </div>
+            <div class="item-price">₹130</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Truffle Fries</h4>
+              <p class="item-desc">Hand-cut fries tossed in truffle oil with parmesan.</p>
+            </div>
+            <div class="item-price">₹180</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="menu-category" aria-labelledby="mains-title">
+        <h3 id="mains-title">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M12 3v18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Main Course
+        </h3>
+
+        <div class="items" role="list">
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Pan-Seared Salmon</h4>
+              <p class="item-desc">Tender salmon fillet, lemon beurre blanc, charred asparagus.</p>
+            </div>
+            <div class="item-price">₹599</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Paneer Butter Masala</h4>
+              <p class="item-desc">Creamy tomato fenugreek gravy with tender paneer cubes.</p>
+            </div>
+            <div class="item-price">₹260</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Herb Lamb Chops</h4>
+              <p class="item-desc">Grilled lamb chops with rosemary jus and potato fondant.</p>
+            </div>
+            <div class="item-price">₹749</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="menu-category" aria-labelledby="desserts-title">
+        <h3 id="desserts-title">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3 4 9 4 9 8v8H3v-8c0-4 6-4 9-8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Desserts
+        </h3>
+
+        <div class="items" role="list">
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Chocolate Brownie</h4>
+              <p class="item-desc">Molten brownie with vanilla bean ice cream.</p>
+            </div>
+            <div class="item-price">₹180</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Gulab Jamun</h4>
+              <p class="item-desc">Handmade, syrup-soaked and warm.</p>
+            </div>
+            <div class="item-price">₹90</div>
+          </article>
+
+          <article class="item" role="listitem">
+            <div class="item-main">
+              <h4 class="dish">Crème Brûlée</h4>
+              <p class="item-desc">Silky custard with caramelized sugar top.</p>
+            </div>
+            <div class="item-price">₹220</div>
+          </article>
+        </div>
+      </section>
+
+    </section>
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact & Hours</h2>
+      <div class="contact-grid">
+        <div>
+          <h4>Address</h4>
+          <p>MG Road, Indore, India</p>
+        </div>
+        <div>
+          <h4>Phone</h4>
+          <p>+91 98765 43210</p>
+        </div>
+        <div>
+          <h4>Opening Hours</h4>
+          <p>Mon–Sun · 10:00 AM – 11:00 PM</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div>© 2025 Café Delight · All rights reserved</div>
+  </footer>
+
+</body>
+</html>
